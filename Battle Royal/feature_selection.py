@@ -108,7 +108,7 @@ class BaseBRO:
         return sig_pop
 
     def feature_score(self, pop):
-        num = np.random.random() # generates a random number between [0,1)
+        num = np.random.uniform(0.5,1/(1+np.exp(-1))) # generates a random number between [0,1)
         Is1 = []
         score = np.zeros((len(pop[0][0])))
         for i in range(len(pop)):
@@ -128,7 +128,7 @@ class BaseBRO:
             I = self.after_evolve()
             I_sig = self.sigmoid(I)
             score = self.feature_score(I_sig)
-            print(score)
+            print(*score, sep = ', ')
 
 
 df = pd.read_csv("Datasets/Diabetic/messidor_features.csv", sep=",")

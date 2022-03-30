@@ -1,8 +1,11 @@
+import enum
 import random
 import pandas as pd
 from sklearn import preprocessing
 import numpy as np
 from numpy.linalg import norm
+from sklearn import metrics, preprocessing, svm
+from sklearn.model_selection import KFold, train_test_split
 
 class BaseBRO:
 
@@ -124,11 +127,18 @@ class BaseBRO:
         return score
 
     def feature_ranking(self):
+        #new_arr = [old arr[i] fpr i in indees]
+        overall_score = np.zeros((len(self.pop[0][0])))
         for i in range(self.epoach):
             I = self.after_evolve()
             I_sig = self.sigmoid(I)
             score = self.feature_score(I_sig)
-            print(*score, sep = ', ')
+            overall_score = np.add(score, overall_score)
+        
+        indices = sorted([(x,i) for i,x in enumerate(overall_score)])
+        top_fetures = indices[(len(self.pop[0][0]))//2:]
+        return top_fetures
+
 
 
 df = pd.read_csv("Datasets/Diabetic/messidor_features.csv", sep=",")
@@ -142,4 +152,44 @@ X = np.array(scaled_df.iloc[:,:])
 y = np.array(df.iloc[:,-1])
 
 optimizer = BaseBRO(X, y, 5)
-optimizer.feature_ranking()
+top_features= optimizer.feature_ranking() #prints a array of tuples of feature indices and feature score
+
+
+
+
+accuracy = np.zeros(5)
+
+clf = svm.SVC(kernel='linear')
+
+kf = KFold(n_splits=5, shuffle=True)
+
+idx = 0
+#print(X.shape)
+top_features_indices = np.zeros(len(top_features))
+for i in range(len(top_features)):
+    top_features_indices[i] = top_features[i][1]
+
+
+top_features_indices = sorted(top_features_indices, reverse=True)
+
+X2 = [[] for i in range(X.shape[0])]
+
+while len(top_features_indices)>0:
+    z=top_features_indices.pop()
+    for i in range(X.shape[0]):
+        X2[i].append(X[i][int(z)])
+
+for train_index, test_index in kf.split(X):
+    X_train, X_test = X[train_index], X[test_index]
+    y_train, y_test = y[train_index], y[test_index]
+
+    clf.fit(X_train,y_train)
+    y_pred = clf.predict(X_test)
+    #print("Accuracy",metrics.accuracy_score(y_test, y_pred))
+    accuracy[idx]=(metrics.accuracy_score(y_test, y_pred))
+    idx+=1
+    
+    
+print("min accuracy", accuracy.min())
+print("max accuracy", accuracy.max())
+print("avg accuracy", accuracy.mean())

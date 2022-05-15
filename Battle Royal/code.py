@@ -12,8 +12,9 @@ problem_dict = {
     "verbose": False
 }
 
-optimizer = BRO.BaseBRO(problem=problem_dict, epoch=100, pop_size=100, threshold= 3 )
+# optimizer = BRO.BaseBRO(problem=problem_dict, epoch=100, pop_size=100, threshold= 3 )
 
-best_solution, best_fitness = optimizer.solve()
-print("best solution is: ",best_solution)
-print("best fittness is: ",best_fitness)
+# best_solution, best_fitness = optimizer.solve()
+# print("best solution is: ",best_solution)
+# print("best fittness is: ",best_fitness)
+print(np.random.randint(0,15))
